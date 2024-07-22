@@ -1,0 +1,246 @@
+<h1 class="form-group text-center">Project!!</h1>
+<div class="d-flex justify-content-center align-items-center">
+  <%= link_to edit_project_path(@project), class: "text-dark mr-2" do %>
+    <%= content_tag(:i, '', class: 'fas fa-pencil-alt') %>
+  <% end %>
+  <p class="card-text">Created by: <%= @project.user.email %></p>
+</div>
+
+<div class="col-md-11 text-right">
+<div class="d-flex flex-column align-items-end">
+<%= link_to "#{content_tag(:i, '', class: 'fas fa-cog settings-icon')} Edit Project".html_safe, edit_project_path(@project), class: "btn btn-info mb-2" %>
+<%= link_to "#{content_tag(:i, '', class: 'fas fa-users')} Members".html_safe, "#members", class: "btn btn-warning mb-2" %>
+<%= link_to "#{content_tag(:i, '', class: 'fas fa-comment-dots')} Topics".html_safe, "#topics", class: "btn btn-warning mb-2" %>
+<%= link_to "#{content_tag(:i, '', class: 'fas fa-list')} Tasks".html_safe, "#tasks", class: "btn btn-warning mb-2" %>
+<%= link_to "#{content_tag(:i, '', class: 'fas fa-file')} Attachments".html_safe, "#attachments", class: "btn btn-warning mb-2" %>
+
+</div>
+</div>
+</div>
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 offset-md-1">
+      <div class="mr-4">
+        <h5>Members:</h5>
+        <div class="d-flex mb-3">
+          <%= link_to edit_project_path(@project), class: "text-dark mr-2" do %>
+            <%= content_tag(:i, '', class: 'fas fa-pencil-alt') %>
+          <% end %>
+          <p class="card-text">
+            <%= @project.user.email %> (
+            <%= raw(@project.user.admin? ? '<i class="fas fa-crown"></i> Admin' : '<i class="fas fa-user"></i> User') %>)
+          </p>
+        </div>
+
+
+<h2 id="threads">Threads</h2>
+
+<%= form_with(model: [@project, DiscussionThread.new], local: true, remote: true) do |form| %>
+  <div class="form-group">
+    <%= form.label :add_new_thread %>
+    <div class="input-group">
+      <%= form.text_field :title, class: 'form-control', placeholder: 'Add New Discussion Thread' %>
+      <div class="input-group-append ml-5">
+        <%= form.button type: 'submit', class: 'btn btn-warning' do %>
+          <i class="fas fa-plus"></i>
+          New Thread
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div id="threads-list">
+  <% @project.discussion_threads.each do |discussion_thread| %>
+    <div class="card mb-3">
+    
+
+     <!-- Heading Part -->
+<div class="card-header d-flex justify-content-between align-items-center bg-light">
+  <h3 class="card-title mb-0"><%= discussion_thread.title %></h3>
+  <div class="d-flex">
+    <%= link_to '#', class: 'btn btn-light', id: "update-thread-#{discussion_thread.id}", onclick: "toggleUpdateForm('thread', #{discussion_thread.id})" do %>
+                       <i class="fas fa-cog"></i>
+    <% end %>
+    <%= button_to project_discussion_thread_path(@project, discussion_thread), method: :delete, data: { confirm: 'Are you sure?' }, remote: true, class: 'btn btn-danger' do %>
+      <i class="fas fa-trash-alt"></i>
+    <% end %>
+  </div>
+</div>
+
+<!-- Messages Part -->
+<div class="card-body">
+  <div id="messages-list" class="mb-3">
+    <% discussion_thread.messages.each do |message| %>
+      <div id="message-<%= message.id %>" class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <p class="mb-0">
+            <i class="fa fa-comment-dots"></i> <strong> <%= message.user.email %></strong>
+          </p>
+          <p class="mb-0 ml-4"><%= message.content %></p>
+        </div>
+        <div class="d-flex">
+          <%= link_to '#', class: 'btn btn-light', id: "update-message-#{message.id}", onclick: "toggleUpdateForm('message', #{message.id})" do %>
+            <i class="fas fa-pencil-alt"></i> Edit
+          <% end %>
+          <%= button_to project_discussion_thread_message_path(@project, discussion_thread, message), method: :delete, data: { confirm: 'Are you sure?' }, remote: true, class: 'btn btn-danger ml-2' do %>
+            <i class="fas fa-trash-alt"></i> Delete
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+
+      <!-- Update Forms -->
+      <div class="card-footer bg-light" id="update-form-thread-<%= discussion_thread.id %>" style="display: none;">
+        <%= form_with(model: [@project, discussion_thread], local: true, html: { class: 'update-thread-form' }) do |form| %>
+          <%= form.text_field :title, class: 'form-control', placeholder: 'Update thread title...' %>
+          <%= form.submit 'Update', class: 'btn btn-primary' %>
+        <% end %>
+      </div>
+
+      <% discussion_thread.messages.each do |message| %>
+        <div class="card-footer bg-light" id="update-form-message-<%= message.id %>" style="display: none;">
+          <%= form_with(model: [@project, discussion_thread, message], local: true, html: { class: 'update-message-form' }) do |form| %>
+            <%= form.text_area :content, class: 'form-control', placeholder: 'Update message content...' %>
+            <%= form.submit 'Update', class: 'btn btn-primary' %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Message Form Part -->
+      <div class="card-footer bg-light">
+  <%= form_with(model: [@project, discussion_thread, Message.new], local: true, remote: true) do |form| %>
+    <div class="form-group mb-2 d-flex align-items-center">
+      <%= form.text_area :content, class: 'form-control flex-grow-1', placeholder: 'Add a new message...' %>
+      <%= form.submit 'Send', class: 'btn btn-warning ml-2 font-weight-bold' %>
+    </div>
+  <% end %>
+</div>
+    </div>
+  <% end %>
+</div>
+<hr>
+
+ <h2 id="tasks">Tasks</h2>
+        <%= form_with(model: [@project, Task.new], local: true, remote: true) do |form| %>
+          <div class="form-group">
+            <%= form.label :add_new_task %>
+            <div class="input-group">
+              <%= form.text_field :title, class: 'form-control', placeholder: 'Add New Task' %>
+              <div class="input-group-append ml-5">
+                <%= form.button type: 'submit', class: 'btn btn-warning' do %>
+                  <i class="fas fa-plus"></i>
+                  New Task
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+      <div id="tasks-list">
+          <% @project.tasks.each_with_index do |task, index| %>
+            <div class="card mb-3">
+              <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                <h3 class="card-title mb-0">Task <%= index + 1 %>: <%= task.title %></h3>
+                <div class="d-flex">
+                  <%= link_to '#', class: 'btn btn-light', id: "update-task-#{task.id}", onclick: "toggleUpdateForm('task', #{task.id})" do %>
+                    <i class="fas fa-cog"></i>
+                  <% end %>
+                  <%= button_to project_task_path(@project, task), method: :delete, data: { confirm: 'Are you sure?' }, remote: true, class: 'btn btn-danger' do %>
+                    <i class="fas fa-trash-alt"></i>
+                  <% end %>
+                </div>
+              </div>
+              <div class="card-footer bg-light" id="update-form-task-<%= task.id %>" style="display: none;">
+                <%= form_with(model: [@project, task], local: true, html: { class: 'update-task-form' }) do |form| %>
+                  <%= form.text_field :title, class: 'form-control', placeholder: 'Update task title...' %>
+                  <%= form.submit 'Update', class: 'btn btn-primary' %>
+                  <%= button_tag type: 'button', class: 'btn btn-secondary', onclick: "toggleUpdateForm('task', #{task.id})" do %>
+                    Cancel
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+
+<hr>
+
+
+        <%= form_with(model: [@project, Attachment.new], local: true, html: { class: 'form-inline my-2' }) do |form| %>
+          <div class="form-group mr-2">
+            <%= form.label :attachment_file, " Add Attachments:", class: 'mr-2 mb-2' %>
+            <%= form.file_field :attachment_file, class: 'form-control-file' %>
+          </div>
+
+          <div class="form-group">
+            <%= form.button(type: 'submit', class: 'btn btn-warning mt-4') do %>
+              <i class="fas fa-file-upload mr-2"></i> Upload
+            <% end %>
+          </div>
+        <% end %>
+
+        <h3 class="my-4">Attachments</h2>
+        <div class="list-group">
+          <% @attachments.each do |attachment| %>
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong><%= attachment.attachment_file.filename %></strong> - <em><strong>Format: </strong><%= attachment.attachment_file.content_type %></em>
+              </div>
+              <%= button_to 'Delete', project_attachment_path(@project, attachment), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="d-flex mb-3 mt-4">
+        <%= link_to "Back to projects", projects_path, class: "btn btn-secondary" %>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function toggleUpdateForm(threadId) {
+    const form = document.querySelector(`#discussion_thread-${threadId} form`);
+    if (form) {
+      const textField = form.querySelector('.form-control');
+      const submitButton = form.querySelector('.btn');
+      if (textField && submitButton) {
+        textField.classList.toggle('d-none');
+        submitButton.classList.toggle('d-none');
+      } else {
+        console.error('Text field or submit button not found');
+      }
+    } else {
+      console.error('Form not found');
+    }
+  }
+
+  function toggleUpdateMessageForm(messageId) {
+    const form = document.querySelector(`#message-${messageId} form`);
+    if (form) {
+      const textField = form.querySelector('.form-control');
+      const submitButton = form.querySelector('.btn');
+      if (textField && submitButton) {
+        textField.classList.toggle('d-none');
+        submitButton.classList.toggle('d-none');
+      } else {
+        console.error('Text field or submit button not found');
+      }
+    } else {
+      console.error('Form not found');
+    }
+  }
+</script>
+<script>
+  function toggleUpdateForm(type, id) {
+    const form = document.querySelector(`#update-form-${type}-${id}`);
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  }
+</script>
